@@ -11,7 +11,6 @@ To use assetmanager, cd into your project directory and install assetmanager wit
 ```
 $ cd /to/project/directory
 $ npm install assetmanager --save
-
 ``` 
 
 Setup an external json asset configuration file that holds your development and production css and js files. The format of this file matches that used in cssmin and uglify grunt tasks where the key is the name of the output production file and the following array is a list of files that need to be compressed.
@@ -38,7 +37,6 @@ Setup an external json asset configuration file that holds your development and 
 		]
 	}
 }
-
 ```
 
 This way in your `gruntfile` you can easily import the same `assets.json` config file and plop in the respective values for css and js.
@@ -79,8 +77,6 @@ module.exports = function(grunt) {
 	grunt.registerTask('default', ['cssmin', 'uglify']);
 
 };
-
-
 ```
 
 Then in your node app require `assetmanager`, the example below is partial code from an express setup. Call `assetmanager.init` with your files from your `assets.json` config file. Set the `debug` value to toggle between your compressed files and your development files. You can also set the `webroot` value so that when assetmanager processes your files it will change `public/lib/angular/angular.js` to `/lib/angular/angular.js` so that everything is relative to your webroot.
@@ -131,6 +127,5 @@ Then finally in your template you can output them with whatever templating frame
 {% for file in assets.js %}
 	<script type="text/javascript" src="{{file}}"></script>
 {% endfor %}
-
 ```
 
