@@ -11,9 +11,9 @@ To use assetmanager, cd into your project directory and install assetmanager wit
 ```
 $ cd /to/project/directory
 $ npm install assetmanager --save
-``` 
+```
 
-Setup an external json asset configuration file that holds your development and production css and js files. The format of this file matches that used in cssmin and uglify grunt tasks where the key is the name of the output production file and the following array is a list of files that need to be compressed.
+Setup an external json asset configuration file that holds your development and production css and js files. The format of this file matches that used in cssmin and uglify grunt tasks where the key is the name of the output production file and the following array is a list of files that need to be compressed. You may also add external resources, however these entries should be 1-to-1 key value pairs. External resources will not cause issues with grunt cssmin or uglify, they will simply be treated as empty resources and thus ignored.
 
 **assets.json**
 
@@ -26,6 +26,7 @@ Setup an external json asset configuration file that holds your development and 
 		]
 	},
 	"js": {
+		"//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js",
 		"public/build/js/dist.min.js": [
 			"public/lib/angular/angular.js",
 			"public/lib/angular-cookies/angular-cookies.js",
@@ -108,13 +109,13 @@ module.exports = function(app, passport, db) {
 			});
 			next();
 		});
-		
+
 		// ... Your CODE
 
 	});
-	
+
 	// ... Your CODE
-	
+
 };
 ```
 Then finally in your template you can output them with whatever templating framework you use. Using swig your template might look something like this:

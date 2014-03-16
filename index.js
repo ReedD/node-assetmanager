@@ -62,6 +62,11 @@ exports.init = function (options) {
 			glob(value, globOptions, function (er, files) {
 				assets.js = assets.js.concat(files);
 			});
+			var regex = new RegExp('^(http://|https://|//)');
+			if (value.match(regex).length > 0) {
+				// Source is external
+				assets.js.push(value);
+			}
 		}
 	});
 
