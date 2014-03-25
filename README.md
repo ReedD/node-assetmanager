@@ -5,7 +5,7 @@ Asset manager easily allows you to switch between development and production css
 
 
 ## Usage
-To use assetmanager, cd into your project directory and install assetmanager with npm.
+To use [assetmanager](https://www.npmjs.org/package/assetmanager), cd into your project directory and install assetmanager with npm.
 
 
 ```
