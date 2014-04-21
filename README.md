@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/assetmanager.png)](https://nodei.co/npm/assetmanager/)
+
 node-assetmanager
 =================
 
