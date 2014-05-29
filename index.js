@@ -13,18 +13,14 @@ var glob = require('glob'),
 	_ = require('underscore');
 
 // Asset holder variable
-var assets = {
-	css: [],
-	js: []
-};
+var assets = {};
 
-exports.init = function (options) {
+exports.process = function (options) {
 	// Glob options
 	var globOptions = {sync: true};
 
 	options = _.extend({
-		css: {},
-		js: {},
+		assets: {},
 		debug: true,
 		webroot: false
 	}, options);
@@ -69,23 +65,43 @@ exports.init = function (options) {
 		return files;
 	};
 
-	_.each(['css', 'js'], function (fileType) {
-		_.each(options[fileType], function (value, key) {
-			if (!options.debug) {
-				assets[fileType].push(key);
-			} else {
-				assets[fileType] = assets[fileType].concat(getAssets(value));
+	/**
+	 * Strip server path from from file path so
+	 * that the file path is relative to the webroot
+	 *
+	 * @param  array files
+	 * @return array files clean filenames
+	 */
+	var stripServerPath = function(files) {
+		var regex = new RegExp('^' + options.webroot);
+		_.each(files, function (value, key) {
+			files[key] = value.replace(regex, '');
+		});
+		return files;
+	};
+
+	// Core logic to format assets
+	_.each(options.assets, function (group, groupName) {
+		assets[groupName] = {};
+		_.each(group, function (files, fileType) {
+			assets[groupName][fileType] = [];
+			_.each(files, function (value, key) {
+				if (!options.debug) {
+					// Production
+					assets[groupName][fileType].push(key);
+				} else {
+					// Development
+					assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(value));
+				}
+			});
+			if (options.webroot) {
+				// Strip the webroot foldername from the filepath
+				assets[groupName][fileType] = stripServerPath(assets[groupName][fileType]);
 			}
 		});
-		if (options.webroot) {
-			// Strip the webroot foldername from the filepath
-			var regex = new RegExp('^' + options.webroot);
-			_.each(assets[fileType], function (value, key) {
-				assets[fileType][key] = value.replace(regex, '');
-			});
-		}
 	});
 
+	return assets;
 };
 
 exports.assets = assets;

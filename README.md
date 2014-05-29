@@ -15,29 +15,43 @@ $ cd /to/project/directory
 $ npm install assetmanager --save
 ```
 
-Setup an external json asset configuration file that holds your development and production css and js files. The format of this file matches that used in cssmin and uglify grunt tasks where the key is the name of the output production file and the following array is a list of files that need to be compressed. You may also add external resources, however these entries should be 1-to-1 key value pairs. External resources will not cause issues with grunt cssmin or uglify, they will simply be treated as empty resources and thus ignored.
+Setup an external json asset configuration file that holds your development and production css and js files. The format of this file matches that used in cssmin and uglify grunt tasks where the key is the name of the output production file and the following array is a list of files that need to be compressed. You may also add external resources, however these entries should be 1-to-1 key value pairs. External resources will not cause issues with grunt cssmin or uglify, they will simply be treated as empty resources and thus ignored. You can also group assets into groups, in the example below there are two, `main` and `secondary`. This functionality allows you to create separate builds for different layouts.
 
 **assets.json**
 
 ```
 {
-	"css": {
-		"public/build/css/dist.min.css": [
-			"public/lib/bootstrap/dist/css/bootstrap.css",
-			"public/css/**/*.css"
-		]
+	"main": {
+		"css": {
+			"public/build/css/main.min.css": [
+				"public/lib/bootstrap/dist/css/bootstrap.css",
+				"public/css/**/*.css"
+			]
+		},
+		"js": {
+			"//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js",
+			"public/build/js/main.min.js": [
+				"public/lib/angular/angular.js",
+				"public/lib/angular-cookies/angular-cookies.js",
+				"public/lib/angular-resource/angular-resource.js",
+				"public/lib/angular-ui-router/release/angular-ui-router.js",
+				"public/lib/angular-bootstrap/ui-bootstrap.js",
+				"public/lib/angular-bootstrap/ui-bootstrap-tpls.js",
+				"public/js/**/*.js"
+			]
+		}
 	},
-	"js": {
-		"//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js": "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js",
-		"public/build/js/dist.min.js": [
-			"public/lib/angular/angular.js",
-			"public/lib/angular-cookies/angular-cookies.js",
-			"public/lib/angular-resource/angular-resource.js",
-			"public/lib/angular-ui-router/release/angular-ui-router.js",
-			"public/lib/angular-bootstrap/ui-bootstrap.js",
-			"public/lib/angular-bootstrap/ui-bootstrap-tpls.js",
-			"public/js/**/*.js"
-		]
+	"secondary": {
+		"css": {
+			"public/build/css/secondary.min.css": [
+				"public/css/**/*.css"
+			]
+		},
+		"js": {
+			"public/build/js/secondary.min.js": [
+				"public/js/**/*.js"
+			]
+		}
 	}
 }
 ```
@@ -54,17 +68,23 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		assets: grunt.file.readJSON('config/assets.json'),
 		uglify: {
-			production: {
+			main: {
 				options: {
 					mangle: true,
 					compress: true
 				},
-				files: '<%= assets.js %>'
+				files: '<%= assets.main.js %>'
+			},
+			secondary: {
+				files: '<%= assets.secondary.js %>'
 			}
 		},
 		cssmin: {
-			combine: {
-				files: '<%= assets.css %>'
+			main: {
+				files: '<%= assets.main.css %>'
+			},
+			secondary: {
+				files: '<%= assets.secondary.css %>'
 			}
 		}
 	});
@@ -97,17 +117,15 @@ module.exports = function(app, passport, db) {
 
 	app.configure(function() {
 		// Import your asset file
-		var assets = require('./assets.json');
-		assetmanager.init({
-			js: assets.js,
-			css: assets.css,
+		var assets = assetmanager.process({
+			assets: require('./assets.json'),
 			debug: (process.env.NODE_ENV !== 'production'),
 			webroot: 'public'
 		});
 		// Add assets to local variables
 		app.use(function (req, res, next) {
 			res.locals({
-				assets: assetmanager.assets
+				assets: assets
 			});
 			next();
 		});
@@ -120,15 +138,26 @@ module.exports = function(app, passport, db) {
 
 };
 ```
-Then finally in your template you can output them with whatever templating framework you use. Using swig your template might look something like this:
+Then finally in your template you can output them with whatever templating framework you use. Using swig your main layout template might look something like this:
 
 ```
-{% for file in assets.css %}
+{% for file in assets.main.css %}
 	<link rel="stylesheet" href="{{file}}">
 {% endfor %}
 
-{% for file in assets.js %}
+{% for file in assets.main.js %}
 	<script type="text/javascript" src="{{file}}"></script>
 {% endfor %}
 ```
 
+And in perhaps a secondary layout your second group of files:
+
+```
+{% for file in assets.secondary.css %}
+	<link rel="stylesheet" href="{{file}}">
+{% endfor %}
+
+{% for file in assets.secondary.js %}
+	<script type="text/javascript" src="{{file}}"></script>
+{% endfor %}
+```
