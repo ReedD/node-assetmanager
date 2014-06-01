@@ -1,4 +1,4 @@
-[![NPM](https://nodei.co/npm/assetmanager.png)](https://nodei.co/npm/assetmanager/)
+[![NPM](https://nodei.co/npm/assetmanager.png?downloads=true)](https://nodei.co/npm/assetmanager/)
 
 node-assetmanager
 =================
