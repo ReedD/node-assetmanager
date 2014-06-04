@@ -8,7 +8,7 @@
 
 'use strict';
 
-var glob = require('glob'),
+var grunt = require('grunt'),
 	fs = require('fs'),
 	_ = require('underscore');
 
@@ -16,8 +16,6 @@ var glob = require('glob'),
 var assets = {};
 
 exports.process = function (options) {
-	// Glob options
-	var globOptions = {sync: true};
 
 	options = _.extend({
 		assets: {},
@@ -26,43 +24,26 @@ exports.process = function (options) {
 	}, options);
 
 	/**
-	 * Filter out assets that are not files
-	 *
-	 * @param files
-	 */
-	var filterFiles = function (files) {
-		return _.filter(files, function (file) {
-			return fs.statSync(file).isFile();
-		});
-	};
-
-	/**
 	 * Get assets from pattern. Pattern could be
 	 *  - an array
 	 *  - a string
 	 *  - external resource
 	 *
-	 * @param pattern
+	 * @param patterns
 	 */
-	var getAssets = function (pattern) {
-		var files = [];
-		if (_.isArray(pattern)) {
-			_.each(pattern, function (path) {
-				files = files.concat(getAssets(path));
-			});
-		} else if (_.isString(pattern)) {
+	var getAssets = function (patterns) {
+		// External restources have to be 1:1 dest to src, both strings
+		// Check for external first, otherwise expand the pattern
+		if (!_.isArray(patterns)) {
 			var regex = new RegExp('^(http://|https://|//)');
-			if (regex.test(pattern)) {
-				// Source is external
-				files.push(pattern);
-			} else {
-				glob(pattern, globOptions, function (er, matches) {
-					files = filterFiles(matches);
-				});
+			if (regex.test(patterns)) {
+				return [patterns]
 			}
+
+			patterns = [patterns];
 		}
 
-		return files;
+		return grunt.file.expand({filter: 'isFile'}, patterns);
 	};
 
 	/**
@@ -85,15 +66,19 @@ exports.process = function (options) {
 		assets[groupName] = {};
 		_.each(group, function (files, fileType) {
 			assets[groupName][fileType] = [];
-			_.each(files, function (value, key) {
-				if (!options.debug) {
-					// Production
-					assets[groupName][fileType].push(key);
-				} else {
-					// Development
-					assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(value));
-				}
-			});
+			if ('src' in files || 'dest' in files) {
+				assets[groupName][fileType] = ((options.debug) ? getAssets(files.src) : files.dest);
+			} else {
+				_.each(files, function (value, key) {
+					if (!options.debug) {
+						// Production
+						assets[groupName][fileType].push(key);
+					} else {
+						// Development
+						assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(value));
+					}
+				});
+			}
 			if (options.webroot) {
 				// Strip the webroot foldername from the filepath
 				assets[groupName][fileType] = stripServerPath(assets[groupName][fileType]);
