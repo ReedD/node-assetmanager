@@ -233,7 +233,7 @@ objects from the assets configuration:
 
 ### Node.js Configuration
 In your node app require `assetmanager`, the example below is partial code
-from an express setup. Call `assetmanager.init` with your files from your
+from an express setup. Call `assetmanager.process` with your files from your
 `assets.json` config file. Set the `debug` value to toggle between your
 compressed files and your development files. You can also set the `webroot`
 value so that when assetmanager processes your files it will change
