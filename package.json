@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/ReedD/node-assetmanager",
   "dependencies": {
-    "glob": "^3.2.9",
+    "grunt": "^0.4.5",
     "underscore": "^1.6.0"
   }
 }
