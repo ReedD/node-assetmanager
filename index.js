@@ -9,7 +9,6 @@
 'use strict';
 
 var grunt = require('grunt'),
-	fs = require('fs'),
 	_ = require('underscore');
 
 // Asset holder variable
@@ -37,7 +36,7 @@ exports.process = function (options) {
 		if (!_.isArray(patterns)) {
 			var regex = new RegExp('^(http://|https://|//)');
 			if (regex.test(patterns)) {
-				return [patterns]
+				return [patterns];
 			}
 
 			patterns = [patterns];
@@ -54,7 +53,12 @@ exports.process = function (options) {
 	 * @return array files clean filenames
 	 */
 	var stripServerPath = function(files) {
-		var regex = new RegExp('^' + options.webroot);
+		var regex;
+		if (options.webroot instanceof RegExp) {
+			regex = options.webroot;
+		} else {
+			regex = new RegExp('^' + options.webroot);
+		}
 		_.each(files, function (value, key) {
 			files[key] = value.replace(regex, '');
 		});
