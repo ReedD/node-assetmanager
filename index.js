@@ -19,8 +19,13 @@ exports.process = function (options) {
 	options = _.extend({
 		assets: {},
 		debug: true,
-		webroot: false
+		webroot: false,
+	    grunt_options: {}
 	}, options);
+
+	var grunt_options = _.extend({
+	    filter: 'isFile'
+	}, options.grunt_options);
 
 	/**
 	 * Get assets from pattern. Pattern could be
@@ -42,7 +47,7 @@ exports.process = function (options) {
 			patterns = [patterns];
 		}
 
-		return grunt.file.expand({filter: 'isFile'}, patterns);
+		return grunt.file.expand(grunt_options, patterns);
 	};
 
 	/**

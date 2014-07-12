@@ -247,6 +247,10 @@ resources.
 * assets - an object containing the list of assets
 * debug - when true returns source assets rather than destination files
 * webroot - strip the webroot folder name from the file paths
+* grunt_options - an object passed to [grunt.file.expand()](http://gruntjs.com/api/grunt.file#grunt.file.expand)
+    that also supports all [minimatch options](https://github.com/isaacs/minimatch#options).
+    By default, grunt_options has the 'filter' option set to 'isFile' -
+    changing this may have dramatic effects on how assetmanager functions.
 
 ```
 'use strict';
@@ -266,7 +270,8 @@ module.exports = function(app, passport, db) {
 		var assets = assetmanager.process({
 			assets: require('./assets.json'),
 			debug: (process.env.NODE_ENV !== 'production'),
-			webroot: 'public'
+			webroot: 'public',
+            grunt_options: { cwd: '../' }
 		});
 		// Add assets to local variables
 		app.use(function (req, res, next) {
