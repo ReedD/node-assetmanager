@@ -19,7 +19,8 @@ exports.process = function (options) {
 	options = _.extend({
 		assets: {},
 		debug: true,
-		webroot: false
+		webroot: false,
+		cachebust: 'local'
 	}, options);
 
 	/**
@@ -65,6 +66,27 @@ exports.process = function (options) {
 		return files;
 	};
 
+	/**
+	 * Append random strings to url paths
+	 * If options.cachebust
+	 *    'local' || true  - only cache bust local
+	 *    'all'            - cache bust local and remote
+	 *
+	 * @param  array files
+	 * @return array files with cache bust parameters
+	 */
+	var cacheBustPaths = function(files) {
+		if (!options.cachebust) return files;
+		var salt = Math.random().toString(36).substring(7);
+		_.each(files, function (value, key) {
+			var regex = new RegExp('^(http://|https://|//)');
+			if (options.cachebust == 'all' || !regex.test(files[key])) {
+				files[key] = files[key] + '?' + salt;
+			}
+		});
+		return files;
+	};
+
 	// Core logic to format assets
 	_.each(options.assets, function (group, groupName) {
 		assets[groupName] = {};
@@ -86,6 +108,10 @@ exports.process = function (options) {
 			if (options.webroot) {
 				// Strip the webroot foldername from the filepath
 				assets[groupName][fileType] = stripServerPath(assets[groupName][fileType]);
+			}
+			if (options.cachebust) {
+				// Add cache bust to paths
+				assets[groupName][fileType] = cacheBustPaths(assets[groupName][fileType]);
 			}
 		});
 	});

@@ -244,9 +244,13 @@ For the sake of efficiency, assetmanager should be configured after your static
 resources.
 
 #### Options
-* assets - an object containing the list of assets
-* debug - when true returns source assets rather than destination files
-* webroot - strip the webroot folder name from the file paths
+* assets - An object containing the list of assets. Default: `{}`
+* debug - When true returns source assets rather than destination files. Default: `true`
+* webroot - Strip the webroot folder name from the file paths. Default: `false`
+* cachebust - Append a cache bust string to the end of the asset path. Default: `'local'`
+	* `'local'` appends cache bust to local files only. 
+	* `'all'` appends cache bust to local and remote/cdn files.
+	* `false` disables cache bust.
 
 ```
 'use strict';
