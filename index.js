@@ -9,7 +9,17 @@
 'use strict';
 
 var grunt = require('grunt'),
+	crypto = require('crypto'),
 	_ = require('underscore');
+
+/**
+ * Checks that `resource` is an external URL.
+ *
+ * @param resource
+ */
+function isExternal(resource) {
+	return new RegExp('^(?:https?:)//').test(resource);
+}
 
 // Asset holder variable
 var assets = {};
@@ -19,8 +29,7 @@ exports.process = function (options) {
 	options = _.extend({
 		assets: {},
 		debug: true,
-		webroot: false,
-		cachebust: 'local'
+		webroot: false
 	}, options);
 
 	/**
@@ -35,8 +44,7 @@ exports.process = function (options) {
 		// External restources have to be 1:1 dest to src, both strings
 		// Check for external first, otherwise expand the pattern
 		if (!_.isArray(patterns)) {
-			var regex = new RegExp('^(http://|https://|//)');
-			if (regex.test(patterns)) {
+			if (isExternal(patterns)) {
 				return [patterns];
 			}
 
@@ -67,24 +75,20 @@ exports.process = function (options) {
 	};
 
 	/**
-	 * Append random strings to url paths
-	 * If options.cachebust
-	 *    'local' || true  - only cache bust local
-	 *    'all'            - cache bust local and remote
+	 * Computes an MD5 digest of given files.
 	 *
 	 * @param  array files
-	 * @return array files with cache bust parameters
+	 * @return MD5 hash (hex-encoded)
 	 */
-	var cacheBustPaths = function(files) {
-		if (!options.cachebust) return files;
-		var salt = Math.random().toString(36).substring(7);
-		_.each(files, function (value, key) {
-			var regex = new RegExp('^(http://|https://|//)');
-			if (options.cachebust == 'all' || !regex.test(files[key])) {
-				files[key] = files[key] + '?' + salt;
-			}
+	function md5(files) {
+		console.log(files);
+		var hash = crypto.createHash('md5');
+    _.each(files, function(file) {
+			if (!isExternal(file))
+				hash.update(grunt.file.read(file), 'utf-8');
 		});
-		return files;
+		var result = hash.digest('hex');
+		return result;
 	};
 
 	// Core logic to format assets
@@ -95,10 +99,12 @@ exports.process = function (options) {
 			if ('src' in files || 'dest' in files) {
 				assets[groupName][fileType] = ((options.debug) ? getAssets(files.src) : files.dest);
 			} else {
-				_.each(files, function (value, key) {
+				_.each(files, function (files, key) {
 					if (!options.debug) {
 						// Production
-						assets[groupName][fileType].push(key);
+						var fingerprint = isExternal(key) ? '' :
+							'?' + md5(files).substring(0, 8);
+						assets[groupName][fileType].push(key + fingerprint);
 					} else {
 						// Development
 						assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(value));
@@ -108,10 +114,6 @@ exports.process = function (options) {
 			if (options.webroot) {
 				// Strip the webroot foldername from the filepath
 				assets[groupName][fileType] = stripServerPath(assets[groupName][fileType]);
-			}
-			if (options.cachebust) {
-				// Add cache bust to paths
-				assets[groupName][fileType] = cacheBustPaths(assets[groupName][fileType]);
 			}
 		});
 	});
