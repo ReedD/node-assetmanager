@@ -106,7 +106,7 @@ exports.process = function (options) {
 						assets[groupName][fileType].push(key + fingerprint);
 					} else {
 						// Development
-						assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(value));
+						assets[groupName][fileType] = assets[groupName][fileType].concat(getAssets(files));
 					}
 				});
 			}
