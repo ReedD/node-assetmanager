@@ -82,7 +82,7 @@ exports.process = function (options) {
 	 */
 	function md5(files) {
 		var hash = crypto.createHash('md5');
-    _.each(files, function(file) {
+		_.each(files, function(file) {
 			if (!isExternal(file))
 				hash.update(grunt.file.read(file), 'utf-8');
 		});
