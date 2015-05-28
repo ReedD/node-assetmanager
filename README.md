@@ -38,7 +38,8 @@ In the [assets file](#assets.json) below, the main js files might be passed
 to [grunt-contrib-uglify](https://github.com/gruntjs/grunt-contrib-uglify).  The
 output from that Grunt task would be in "public/build/js/main.min.js" - in
 production mode, assetmanager will place that filename in the list of assets in
-_assets.main.js_.  In debug mode, assetmanager would flatten the lists of
+_assets.main.js_ and appends it with MD5 fingerprint of source files.
+In debug mode, assetmanager would flatten the lists of
 js source files, placing the flattened list in _assets.main.js_.  This makes
 original, uncompressed js source files available in the browser during
 debugging.
@@ -246,11 +247,7 @@ resources.
 #### Options
 * assets - An object containing the list of assets. Default: `{}`
 * debug - When true returns source assets rather than destination files. Default: `true`
-* webroot - Strip the webroot folder name from the file paths. Default: `false`
-* cachebust - Append a cache bust string to the end of the asset path. Default: `'local'`
-	* `'local'` appends cache bust to local files only. 
-	* `'all'` appends cache bust to local and remote/cdn files.
-	* `false` disables cache bust.
+* webroot - Strip the webroot folder name from the file paths. Default: `false`.
 
 ```
 'use strict';
@@ -266,7 +263,7 @@ module.exports = function(app, passport, db) {
 	app.use(express.static(config.root + '/client'));
 
 	app.configure(function() {
-		// Import your asset file
+		// Process your assets file
 		var assets = assetmanager.process({
 			assets: require('./assets.json'),
 			debug: (process.env.NODE_ENV !== 'production'),
