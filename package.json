@@ -4,7 +4,7 @@
   "description": "Asset manager easily allows you to switch between development and production css and js files in your templates by managing them in a single json file that's still compatible with grunt cssmin and uglify.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -R spec"
   },
   "repository": {
     "type": "git",
@@ -26,5 +26,8 @@
   "dependencies": {
     "grunt": "^0.4.5",
     "underscore": "^1.6.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
   }
 }

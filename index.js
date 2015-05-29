@@ -26,6 +26,8 @@ var assets = {};
 
 exports.process = function (options) {
 
+  assets = {};
+
 	options = _.extend({
 		assets: {},
 		debug: true,
@@ -86,8 +88,7 @@ exports.process = function (options) {
 			if (!isExternal(file))
 				hash.update(grunt.file.read(file), 'utf-8');
 		});
-		var result = hash.digest('hex');
-		return result;
+    return hash.digest('hex');
 	};
 
 	// Core logic to format assets
@@ -102,7 +103,7 @@ exports.process = function (options) {
 					if (!options.debug) {
 						// Production
 						var fingerprint = isExternal(key) ? '' :
-							'?' + md5(files).substring(0, 8);
+							'?' + md5(getAssets(files)).substring(0, 8);
 						assets[groupName][fileType].push(key + fingerprint);
 					} else {
 						// Development
@@ -116,6 +117,8 @@ exports.process = function (options) {
 			}
 		});
 	});
+
+  exports.assets = assets;
 
 	return assets;
 };
