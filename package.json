@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/ReedD/node-assetmanager",
   "dependencies": {
-    "grunt": "^0.4.5",
-    "underscore": "^1.6.0"
+    "grunt": "^1.0.1",
+    "lodash": "^4.11.0"
   },
   "devDependencies": {
     "mocha": "*"

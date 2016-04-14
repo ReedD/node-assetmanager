@@ -10,7 +10,7 @@
 
 var grunt = require('grunt'),
 	crypto = require('crypto'),
-	_ = require('underscore');
+	_ = require('lodash');
 
 /**
  * Checks that `resource` is an external URL.
@@ -88,7 +88,7 @@ exports.process = function (options) {
 			if (!isExternal(file))
 				hash.update(grunt.file.read(file), 'utf-8');
 		});
-    return hash.digest('hex');
+    	return hash.digest('hex');
 	};
 
 	// Core logic to format assets
